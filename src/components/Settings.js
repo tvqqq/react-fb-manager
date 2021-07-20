@@ -6,6 +6,8 @@ const Settings = () => {
   const PATH = "/settings";
   const [settings, setSettings] = useState({});
   useEffect(() => {
+    document.title = "React FB Manager | Settings"
+
     const fetchData = async () => {
       const result = await axios(PATH);
       setSettings(result.data);
