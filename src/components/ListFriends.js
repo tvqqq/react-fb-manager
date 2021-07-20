@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import debounce from "lodash.debounce";
 import Loading from "../components/Loading";
+import toast from "react-hot-toast";
 
 const ListFriends = () => {
   const PATH = "/list";
@@ -62,6 +63,32 @@ const ListFriends = () => {
       debouncedChangeHandler.cancel();
     };
   });
+
+  const [disabled, setDisabled] = useState(false);
+  const updateFbFriends = async () => {
+    const toastId = toast.loading("Loading...");
+    setDisabled(true);
+
+    try {
+      const result = await axios();
+
+      if (result.data.success) {
+        toast.success("Update successfully!", {
+          id: toastId,
+        });
+      } else {
+        toast.error(`Failed: ${result.data.message}`, {
+          id: toastId,
+        });
+      }
+      setDisabled(false);
+    } catch (err) {
+      toast.error(`${err}`, {
+        id: toastId,
+      });
+      setDisabled(false);
+    }
+  };
 
   return (
     <>
@@ -169,28 +196,40 @@ const ListFriends = () => {
                 </div>
               ))}
           </div>
-          {!search && !isShowUnf && (
-            <button
-              className="my-5 bg-blue-500 hover:bg-blue-700 text-white font-bol py-2 px-4 rounded inline-flex items-center"
-              onClick={loadMore}
-            >
-              Load More{" "}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3 ml-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+          <div className="flex flex-col mx-auto items-center my-3">
+            {!search && !isShowUnf && (
+              <button
+                className="my-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+                onClick={loadMore}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
-                />
-              </svg>
+                Load More{" "}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3 w-3 ml-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={updateFbFriends}
+              disabled={disabled}
+              className="disabled:opacity-50
+              bg-green-500 hover:bg-green-700 text-white 
+              focus:outline-none focus:ring-2 focus:ring-green-900 focus:ring-opacity-50
+              font-bold py-2 px-4 rounded inline-flex items-center"
+            >
+              Update FB Friends
             </button>
-          )}
+          </div>
         </>
       )}
     </>
