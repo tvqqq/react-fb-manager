@@ -31,7 +31,7 @@ const ListFriends = () => {
   }, [fetch, search]);
 
   const loadMore = async () => {
-    const result = await axios(PATH + `?next=${JSON.stringify(nextToken)}`);
+    const result = await axios(PATH + `?next=${encodeURIComponent(JSON.stringify(nextToken))}`);
     setFriends((f) => [...f, ...result.data.data]);
     setNextToken(result.data.next);
   };
