@@ -3,6 +3,7 @@ import axios from "axios";
 import debounce from "lodash.debounce";
 import Loading from "../components/Loading";
 import toast from "react-hot-toast";
+import _ from 'lodash'
 
 const ListFriends = () => {
   const PATH = "/list";
@@ -42,7 +43,8 @@ const ListFriends = () => {
 
     if (status) {
       const result = await axios(PATH + `?unf=1`);
-      setFriends(result.data.data);
+      const sortedData = _.orderBy(result.data.data, ['unf_at'], ['desc']);
+      setFriends(sortedData);
     } else {
       setFetch((f) => !f);
     }
