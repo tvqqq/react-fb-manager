@@ -3,22 +3,24 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const Settings = () => {
-  const PATH = "/settings";
+  const PATH = "/configs";
   const [settings, setSettings] = useState({});
   useEffect(() => {
-    document.title = "React FB Manager | Settings"
+    document.title = "React FB Manager | Settings";
 
     const fetchData = async () => {
-      const result = await axios(PATH);
-      setSettings(result.data);
+      const result = await axios(PATH + "/get?name=fb_access_token");
+      console.log("result.data.data", result.data.data[0]);
+      setSettings(result.data.data[0]);
     };
 
     fetchData();
   }, []);
 
   const save = async () => {
-    const result = await axios.post(PATH, {
-      ...settings,
+    const result = await axios.post(PATH + "/update", {
+      name: "fb_access_token",
+      value: [settings],
     });
     if (result.data) {
       toast.success("Successfully saved!");
@@ -39,10 +41,8 @@ const Settings = () => {
               type="text"
               className="flex-shrink flex-grow flex-auto leading-normal w-px border h-10 border-grey-light rounded rounded-l-none px-3 relative focus:border-blue focus:shadow-md"
               placeholder="eAA..."
-              value={settings.access_token || ""}
-              onChange={(e) =>
-                setSettings({ ...settings, access_token: e.target.value })
-              }
+              value={settings || ""}
+              onChange={(e) => setSettings(e.target.value)}
             />
           )}
         </div>

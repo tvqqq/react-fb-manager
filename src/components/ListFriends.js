@@ -3,10 +3,9 @@ import axios from "axios";
 import debounce from "lodash.debounce";
 import Loading from "../components/Loading";
 import toast from "react-hot-toast";
-import _ from 'lodash'
 
 const ListFriends = () => {
-  const PATH = "/list";
+  const PATH = "/fb-friends";
   const [friends, setFriends] = useState([]);
   const [nextToken, setNextToken] = useState();
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +19,10 @@ const ListFriends = () => {
       setIsLoading(true);
 
       const result = await axios(
-        PATH + (search !== "" ? `?search=${search}` : "")
+        PATH + "/list" + (search !== "" ? `?search=${search}` : "")
       );
-      setFriends(result.data.data);
-      setNextToken(result.data.next);
+      setFriends(result.data.data.data);
+      setNextToken(result.data.data.next_page_url);
       setIsLoading(false);
     };
 
@@ -31,9 +30,9 @@ const ListFriends = () => {
   }, [fetch, search]);
 
   const loadMore = async () => {
-    const result = await axios(PATH + `?next=${encodeURIComponent(JSON.stringify(nextToken))}`);
-    setFriends((f) => [...f, ...result.data.data]);
-    setNextToken(result.data.next);
+    const result = await axios(nextToken);
+    setFriends((f) => [...f, ...result.data.data.data]);
+    setNextToken(result.data.data.next_page_url);
   };
 
   const [isShowUnf, setIsShowUnf] = useState(false);
@@ -42,9 +41,8 @@ const ListFriends = () => {
     setIsShowUnf(status);
 
     if (status) {
-      const result = await axios(PATH + `?unf=1`);
-      const sortedData = _.orderBy(result.data.data, ['unf_at'], ['desc']);
-      setFriends(sortedData);
+      const result = await axios(PATH + "/unfriend");
+      setFriends(result.data.data);
     } else {
       setFetch((f) => !f);
     }
@@ -72,10 +70,10 @@ const ListFriends = () => {
     setDisabled(true);
 
     try {
-      const result = await axios();
+      const result = await axios(PATH + "/get-friends");
 
       if (result.data.success) {
-        toast.success("Update successfully!", {
+        toast.success("Sent to queue!", {
           id: toastId,
         });
       } else {
@@ -184,14 +182,11 @@ const ListFriends = () => {
                   >
                     {friend.fb_id}
                   </a>
-                  {friend.unf_at > 0 && (
+                  {friend.unf_at && (
                     <div className="mt-1 flex flex-col">
                       <span>---</span>
                       <small className="text-red-600">
-                        Unfriended on:{" "}
-                        {new Date(friend.unf_at * 1000).toLocaleDateString(
-                          "vi-VN"
-                        )}
+                        Unf at: {friend.unf_at}
                       </small>
                     </div>
                   )}
