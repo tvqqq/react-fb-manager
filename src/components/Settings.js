@@ -9,18 +9,17 @@ const Settings = () => {
     document.title = "React FB Manager | Settings";
 
     const fetchData = async () => {
-      const result = await axios(PATH + "/get?name=fb_access_token");
-      console.log("result.data.data", result.data.data[0]);
-      setSettings(result.data.data[0]);
+      const result = await axios(PATH + "/fat");
+      console.log("result.data.data", result.data.data);
+      setSettings(result.data.data);
     };
 
     fetchData();
   }, []);
 
   const save = async () => {
-    const result = await axios.post(PATH + "/update", {
-      name: "fb_access_token",
-      value: [settings],
+    const result = await axios.post(PATH + "/fat", {
+      access_token: settings,
     });
     if (result.data) {
       toast.success("Successfully saved!");
