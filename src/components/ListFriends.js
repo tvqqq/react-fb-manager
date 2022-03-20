@@ -5,9 +5,9 @@ import Loading from "../components/Loading";
 import toast from "react-hot-toast";
 
 const ListFriends = () => {
-  const PATH = "/fb-friends";
+  const PATH = "/fb/friends";
   const [friends, setFriends] = useState([]);
-  const [nextToken, setNextToken] = useState();
+  const [nextToken, setNextToken] = useState(2);
   const [isLoading, setIsLoading] = useState(false);
   const [fetch, setFetch] = useState(false);
   const [search, setSearch] = useState("");
@@ -19,10 +19,9 @@ const ListFriends = () => {
       setIsLoading(true);
 
       const result = await axios(
-        PATH + "/list" + (search !== "" ? `?search=${search}` : "")
+        PATH + "/" + (search !== "" ? `?search=${search}` : "")
       );
-      setFriends(result.data.data.data);
-      setNextToken(result.data.data.next_page_url);
+      setFriends(result.data.data);
       setIsLoading(false);
     };
 
@@ -30,9 +29,11 @@ const ListFriends = () => {
   }, [fetch, search]);
 
   const loadMore = async () => {
-    const result = await axios(nextToken);
-    setFriends((f) => [...f, ...result.data.data.data]);
-    setNextToken(result.data.data.next_page_url);
+    const result = await axios(
+      PATH + "?page=" + nextToken + (search !== "" ? `&search=${search}` : "")
+    );
+    setFriends((f) => [...f, ...result.data.data]);
+    setNextToken(nextToken + 1);
   };
 
   const [isShowUnf, setIsShowUnf] = useState(false);
@@ -41,7 +42,7 @@ const ListFriends = () => {
     setIsShowUnf(status);
 
     if (status) {
-      const result = await axios(PATH + "/unfriend");
+      const result = await axios(PATH + "/unf");
       setFriends(result.data.data);
     } else {
       setFetch((f) => !f);
@@ -70,10 +71,10 @@ const ListFriends = () => {
     setDisabled(true);
 
     try {
-      const result = await axios(PATH + "/get-friends");
+      const result = await axios(PATH + "/fetch");
 
       if (result.data.success) {
-        toast.success("Sent to queue!", {
+        toast.success("Done!", {
           id: toastId,
         });
       } else {
@@ -155,38 +156,38 @@ const ListFriends = () => {
               friends.map((friend) => (
                 <div
                   className="p-2 rounded overflow-hidden shadow flex flex-col justify-center"
-                  key={friend.fb_id}
+                  key={friend.fbId}
                 >
                   <div className="mx-auto">
                     <img
-                      src={friend.fb_avatar}
+                      src={friend.fbAvatar}
                       alt="fb_avatar"
                       className="object-scale-down w-32 h-32 mb-3"
                     />
                   </div>
                   <div className="flex items-center justify-center">
-                    {friend.fb_gender === "male" ? (
+                    {friend.fbGender === "male" ? (
                       <span className="text-blue-400">♂</span>
                     ) : (
                       <span className="text-pink-400">♀</span>
                     )}
                     <span className="text-xl font-bold ml-1">
-                      {friend.fb_name}
+                      {friend.fbName}
                     </span>
                   </div>
                   <a
                     className="text-sm hover:text-blue-400"
-                    href={`https://fb.com/${friend.fb_id}`}
+                    href={`https://fb.com/${friend.fbId}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {friend.fb_id}
+                    {friend.fbId}
                   </a>
-                  {friend.unf_at && (
+                  {friend.unfDate && (
                     <div className="mt-1 flex flex-col">
                       <span>---</span>
                       <small className="text-red-600">
-                        Unf at: {friend.unf_at}
+                        Unf Date: {friend.unfDate}
                       </small>
                     </div>
                   )}
@@ -194,7 +195,7 @@ const ListFriends = () => {
               ))}
           </div>
           <div className="flex flex-col mx-auto items-center my-3">
-            {!search && !isShowUnf && (
+            {!isShowUnf && (
               <button
                 className="my-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
                 onClick={loadMore}
