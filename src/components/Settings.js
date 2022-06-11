@@ -4,25 +4,36 @@ import toast from "react-hot-toast";
 
 const Settings = () => {
   const PATH = "/configs";
-  const [settings, setSettings] = useState({});
+  const [fat, setFat] = useState('');
+  const [fc, setFc] = useState('');
   useEffect(() => {
     document.title = "React FB Manager | Settings";
 
-    const fetchData = async () => {
+    const fetchFat = async () => {
       const result = await axios(PATH + "/fat");
-      console.log("result.data.data", result.data.data);
-      setSettings(result.data.data);
+      setFat(result.data.data);
+    };
+    const fetchFc = async () => {
+      const result = await axios(PATH + "/fc");
+      setFc(result.data.data);
     };
 
-    fetchData();
+    fetchFat();
+    fetchFc();
   }, []);
 
   const save = async () => {
-    const result = await axios.post(PATH + "/fat", {
-      access_token: settings,
+    const resFat = await axios.post(PATH + "/fat", {
+      access_token: fat,
     });
-    if (result.data) {
-      toast.success("Successfully saved!");
+    if (resFat.data) {
+      toast.success("Successfully saved FAT!");
+    }
+    const resFc = await axios.post(PATH + "/fc", {
+      cookie: fc,
+    });
+    if (resFc.data) {
+      toast.success("Successfully saved FC!");
     }
   };
 
@@ -35,16 +46,34 @@ const Settings = () => {
               FB Access Token
             </span>
           </div>
-          {settings && (
+          {fat && (
             <input
               type="text"
               className="flex-shrink flex-grow flex-auto leading-normal w-px border h-10 border-grey-light rounded rounded-l-none px-3 relative focus:border-blue focus:shadow-md"
               placeholder="eAA..."
-              value={settings || ""}
-              onChange={(e) => setSettings(e.target.value)}
+              value={fat || ""}
+              onChange={(e) => setFat(e.target.value)}
             />
           )}
         </div>
+
+        <div className="flex flex-wrap items-stretch w-full mb-4 relative">
+          <div className="flex -mr-px">
+            <span className="flex items-center leading-normal bg-gray-200 rounded rounded-r-none border border-r-0 border-grey-light px-3 whitespace-no-wrap text-gray-500">
+              FB Cookie
+            </span>
+          </div>
+          {fc && (
+            <input
+              type="text"
+              className="flex-shrink flex-grow flex-auto leading-normal w-px border h-10 border-grey-light rounded rounded-l-none px-3 relative focus:border-blue focus:shadow-md"
+              placeholder="sb=..."
+              value={fc || ""}
+              onChange={(e) => setFc(e.target.value)}
+            />
+          )}
+        </div>
+
         <button
           className="my-5 bg-blue-500 hover:bg-blue-700 text-white font-bol py-2 px-4 rounded inline-flex items-center"
           onClick={save}
